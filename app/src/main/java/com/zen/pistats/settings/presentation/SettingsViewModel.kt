@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zen.pistats.R
 import com.zen.pistats.core.presentation.UiText
 import com.zen.pistats.settings.data.AppSettingsRepository
+import com.zen.pistats.settings.domain.TailscaleUrlPolicy
 import com.zen.pistats.widget.PiStatsWidgetSyncManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,8 @@ class SettingsViewModel(
             normalizedToken.isBlank() -> UiText.StringResource(R.string.error_missing_auth_token)
             !normalizedUrl.startsWith("http://") && !normalizedUrl.startsWith("https://") ->
                 UiText.StringResource(R.string.error_invalid_base_url)
+            !TailscaleUrlPolicy.isAllowed(normalizedUrl) ->
+                UiText.StringResource(R.string.error_tailscale_only_base_url)
 
             else -> null
         }

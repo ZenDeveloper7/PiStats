@@ -41,7 +41,7 @@ docs/                 Planning and deployment docs
 - read-only JSON endpoints
 - bearer-token auth
 - bound to `127.0.0.1` by default
-- intended to stay private behind Tailscale or another private network path
+- intended to stay private behind Tailscale
 
 ### Android app
 
@@ -51,6 +51,7 @@ docs/                 Planning and deployment docs
 - DataStore-backed settings
 - polling-based dashboard
 - resizable home-screen widget
+- Tailscale-only endpoint validation
 
 ## API endpoints
 
@@ -109,6 +110,25 @@ Test it:
 curl -H "Authorization: Bearer change-me" http://127.0.0.1:8787/api/stats
 ```
 
+### 1b. Install on a Raspberry Pi with the helper script
+
+After copying `pi-backend/` to the Pi:
+
+```bash
+ssh zen@pi
+cd /home/zen/pistats-backend
+sudo ./install-on-pi.sh --token 'replace-with-a-strong-token'
+```
+
+The installer:
+
+- writes or preserves `.env`
+- installs the `systemd` service
+- enables and starts `pistats.service`
+- checks whether the requested port is busy and automatically moves upward until it finds a free one
+
+Use the final printed port in the Android app base URL.
+
 ### 2. Run the Android app
 
 ```bash
@@ -118,9 +138,14 @@ curl -H "Authorization: Bearer change-me" http://127.0.0.1:8787/api/stats
 Then in the app:
 
 1. Open Settings
-2. Enter the Pi API base URL
+2. Enter the Pi Tailscale URL
 3. Enter the bearer token
 4. Return to the dashboard
+
+The Android app accepts only:
+
+- Tailscale IPv4 addresses in `100.64.0.0/10`, for example `http://100.101.102.103:8787`
+- MagicDNS hostnames ending in `.ts.net`
 
 ## Widget support
 
@@ -133,6 +158,8 @@ Important limitation:
 - the widget updates after settings changes, app refreshes, and periodic background work
 
 ## Pi deployment
+
+PiStats is intentionally constrained to Tailscale for client access. The backend stays local by default, and the Android app rejects non-Tailscale base URLs.
 
 For Raspberry Pi deployment details, see:
 

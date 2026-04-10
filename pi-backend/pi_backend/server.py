@@ -69,7 +69,11 @@ def main() -> None:
     settings = load_settings()
     handler = create_handler(settings)
     server = ThreadingHTTPServer((settings.host, settings.port), handler)
-    print(f"PiStats backend listening on http://{settings.host}:{settings.port}")
+    print(
+        "PiStats backend listening on "
+        f"http://{settings.host}:{settings.port} "
+        f"(bind_mode={settings.bind_mode})"
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

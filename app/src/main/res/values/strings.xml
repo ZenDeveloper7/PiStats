@@ -6,13 +6,13 @@
     <string name="refresh_action">Refresh now</string>
     <string name="back_action">Go back</string>
     <string name="save_action">Save</string>
-    <string name="base_url_label">Pi base URL</string>
+    <string name="base_url_label">Pi Tailscale URL</string>
     <string name="auth_token_label">Auth token</string>
     <string name="base_url_hint">http://100.x.y.z:8787</string>
     <string name="auth_token_hint">Bearer token from the Pi backend</string>
-    <string name="settings_helper">Use your Pi API URL, usually over Tailscale or another private network path.</string>
+    <string name="settings_helper">PiStats only accepts Tailscale addresses. Use a Tailscale IP like http://100.x.y.z:8787 or a MagicDNS hostname ending in .ts.net.</string>
     <string name="config_missing_title">Connection not configured</string>
-    <string name="config_missing_body">Add your Pi base URL and bearer token in Settings to start live polling.</string>
+    <string name="config_missing_body">Add your Pi Tailscale URL and bearer token in Settings to start live polling.</string>
     <string name="cpu_title">CPU</string>
     <string name="memory_title">Memory</string>
     <string name="disk_title">Root disk</string>
@@ -35,6 +35,7 @@
     <string name="error_missing_base_url">Enter the Pi base URL.</string>
     <string name="error_missing_auth_token">Enter the auth token.</string>
     <string name="error_invalid_base_url">Base URL must start with http:// or https://</string>
+    <string name="error_tailscale_only_base_url">Base URL must use a Tailscale IP in 100.64.0.0/10 or a MagicDNS hostname ending in .ts.net</string>
     <string name="error_no_internet">No network connection to the Pi.</string>
     <string name="error_unauthorized">Unauthorized. Check the bearer token.</string>
     <string name="error_forbidden">Access to the Pi API was denied.</string>
