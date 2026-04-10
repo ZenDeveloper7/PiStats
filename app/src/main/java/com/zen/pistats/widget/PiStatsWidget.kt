@@ -1,9 +1,9 @@
 package com.zen.pistats.widget
 
 import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.Composable
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -22,6 +22,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -47,55 +48,121 @@ private fun PiStatsWidgetContent(prefs: Preferences) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(Color(0xFFFFFFFF)))
-            .padding(12.dp)
+            .background(ColorProvider(Color(0xFF0E1726)))
+            .padding(14.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
         Text(
-            text = "PiStats",
-            style = TextStyle(fontWeight = FontWeight.Bold),
+            text = "PISTATS",
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFB6F2E2)),
+                fontWeight = FontWeight.Bold,
+            ),
         )
-        Spacer(modifier = GlanceModifier.height(8.dp))
+        Spacer(modifier = GlanceModifier.height(4.dp))
+        Text(
+            text = "Tailnet Widget",
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFD7E1EC)),
+            ),
+        )
+        Spacer(modifier = GlanceModifier.height(10.dp))
 
         when {
             !isConfigured -> {
-                Text(text = "Configure PiStats in the app")
+                Text(
+                    text = "Configure PiStats in the app",
+                    style = TextStyle(color = ColorProvider(Color.White)),
+                )
             }
 
             error != null -> {
-                Text(text = error)
+                Text(
+                    text = error,
+                    style = TextStyle(color = ColorProvider(Color(0xFFD86060))),
+                )
             }
 
             else -> {
-                MetricRow("Host", prefs[WidgetPreferences.HOST].orEmpty())
-                MetricRow("CPU", prefs[WidgetPreferences.CPU].orEmpty())
-                MetricRow("Memory", prefs[WidgetPreferences.MEMORY].orEmpty())
-                MetricRow("Disk", prefs[WidgetPreferences.DISK].orEmpty())
-                MetricRow("Temp", prefs[WidgetPreferences.TEMPERATURE].orEmpty())
-                MetricRow("Uptime", prefs[WidgetPreferences.UPTIME].orEmpty())
-                MetricRow("Load", prefs[WidgetPreferences.LOAD].orEmpty())
-                MetricRow("Backup", prefs[WidgetPreferences.BACKUP].orEmpty())
-                Spacer(modifier = GlanceModifier.height(6.dp))
+                WidgetStrip(
+                    title = "HOST",
+                    value = prefs[WidgetPreferences.HOST].orEmpty(),
+                )
+                Spacer(modifier = GlanceModifier.height(8.dp))
+                WidgetKeyValue("CPU", prefs[WidgetPreferences.CPU].orEmpty())
+                WidgetKeyValue("MEM", prefs[WidgetPreferences.MEMORY].orEmpty())
+                WidgetKeyValue("DISK", prefs[WidgetPreferences.DISK].orEmpty())
+                WidgetKeyValue("TEMP", prefs[WidgetPreferences.TEMPERATURE].orEmpty())
+                WidgetKeyValue("UPTIME", prefs[WidgetPreferences.UPTIME].orEmpty())
+                WidgetKeyValue("LOAD", prefs[WidgetPreferences.LOAD].orEmpty())
+                WidgetKeyValue("BACKUP", prefs[WidgetPreferences.BACKUP].orEmpty())
+                Spacer(modifier = GlanceModifier.height(10.dp))
                 Text(
                     text = "Services",
-                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    style = TextStyle(
+                        color = ColorProvider(Color(0xFFB8E2FF)),
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
-                Text(text = prefs[WidgetPreferences.SERVICES].orEmpty())
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                Text(
+                    text = prefs[WidgetPreferences.SERVICES].orEmpty(),
+                    style = TextStyle(color = ColorProvider(Color.White)),
+                )
                 Spacer(modifier = GlanceModifier.height(6.dp))
-                Text(text = "Updated ${prefs[WidgetPreferences.LAST_UPDATED].orEmpty()}")
+                Text(
+                    text = "Updated ${prefs[WidgetPreferences.LAST_UPDATED].orEmpty()}",
+                    style = TextStyle(color = ColorProvider(Color(0xFFD7E1EC))),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun MetricRow(label: String, value: String) {
+private fun WidgetStrip(
+    title: String,
+    value: String,
+) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .background(ColorProvider(Color(0xFF1A4368)))
+            .padding(10.dp),
+    ) {
+        Text(
+            text = title,
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFB6F2E2)),
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+        Spacer(modifier = GlanceModifier.height(4.dp))
+        Text(
+            text = value,
+            style = TextStyle(
+                color = ColorProvider(Color.White),
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun WidgetKeyValue(label: String, value: String) {
     Row(modifier = GlanceModifier.fillMaxWidth()) {
         Text(
-            text = "$label: ",
-            style = TextStyle(fontWeight = FontWeight.Bold),
+            text = label,
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFB8E2FF)),
+                fontWeight = FontWeight.Bold,
+            ),
         )
-        Text(text = value)
+        Spacer(modifier = GlanceModifier.width(8.dp))
+        Text(
+            text = value,
+            style = TextStyle(color = ColorProvider(Color.White)),
+        )
     }
 }
 
