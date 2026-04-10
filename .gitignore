@@ -1,0 +1,16 @@
+.gradle/
+.idea/
+.codex/
+local.properties
+build/
+app/build/
+captures/
+*.iml
+
+# Python backend
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
