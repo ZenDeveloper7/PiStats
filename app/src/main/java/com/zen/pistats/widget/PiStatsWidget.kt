@@ -48,22 +48,22 @@ private fun PiStatsWidgetContent(prefs: Preferences) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(Color(0xFF0E1726)))
+            .background(ColorProvider(Color(0xFF101D25)))
             .padding(14.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
         Text(
-            text = "PISTATS",
+            text = "PiStats",
             style = TextStyle(
-                color = ColorProvider(Color(0xFFB6F2E2)),
+                color = ColorProvider(Color(0xFFD3F4E4)),
                 fontWeight = FontWeight.Bold,
             ),
         )
         Spacer(modifier = GlanceModifier.height(4.dp))
         Text(
-            text = "Tailnet Widget",
+            text = "Tailnet monitor",
             style = TextStyle(
-                color = ColorProvider(Color(0xFFD7E1EC)),
+                color = ColorProvider(Color(0xFFC2CAD0)),
             ),
         )
         Spacer(modifier = GlanceModifier.height(10.dp))
@@ -72,14 +72,14 @@ private fun PiStatsWidgetContent(prefs: Preferences) {
             !isConfigured -> {
                 Text(
                     text = "Configure PiStats in the app",
-                    style = TextStyle(color = ColorProvider(Color.White)),
+                    style = TextStyle(color = ColorProvider(Color(0xFFE0E3E7))),
                 )
             }
 
             error != null -> {
                 Text(
                     text = error,
-                    style = TextStyle(color = ColorProvider(Color(0xFFD86060))),
+                    style = TextStyle(color = ColorProvider(Color(0xFFFFB4AB))),
                 )
             }
 
@@ -100,19 +100,19 @@ private fun PiStatsWidgetContent(prefs: Preferences) {
                 Text(
                     text = "Services",
                     style = TextStyle(
-                        color = ColorProvider(Color(0xFFB8E2FF)),
+                        color = ColorProvider(Color(0xFFB7DCE8)),
                         fontWeight = FontWeight.Bold,
                     ),
                 )
                 Spacer(modifier = GlanceModifier.height(4.dp))
                 Text(
                     text = prefs[WidgetPreferences.SERVICES].orEmpty(),
-                    style = TextStyle(color = ColorProvider(Color.White)),
+                    style = TextStyle(color = ColorProvider(Color(0xFFE0E3E7))),
                 )
                 Spacer(modifier = GlanceModifier.height(6.dp))
                 Text(
                     text = "Updated ${prefs[WidgetPreferences.LAST_UPDATED].orEmpty()}",
-                    style = TextStyle(color = ColorProvider(Color(0xFFD7E1EC))),
+                    style = TextStyle(color = ColorProvider(Color(0xFFC2CAD0))),
                 )
             }
         }
@@ -127,13 +127,13 @@ private fun WidgetStrip(
     Column(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .background(ColorProvider(Color(0xFF1A4368)))
+            .background(ColorProvider(Color(0xFF234B5C)))
             .padding(10.dp),
     ) {
         Text(
             text = title,
             style = TextStyle(
-                color = ColorProvider(Color(0xFFB6F2E2)),
+                color = ColorProvider(Color(0xFFD3F4E4)),
                 fontWeight = FontWeight.Bold,
             ),
         )
@@ -141,7 +141,7 @@ private fun WidgetStrip(
         Text(
             text = value,
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = ColorProvider(Color(0xFFFFFFFF)),
                 fontWeight = FontWeight.Bold,
             ),
         )
@@ -154,14 +154,14 @@ private fun WidgetKeyValue(label: String, value: String) {
         Text(
             text = label,
             style = TextStyle(
-                color = ColorProvider(Color(0xFFB8E2FF)),
+                color = ColorProvider(Color(0xFFB7DCE8)),
                 fontWeight = FontWeight.Bold,
             ),
         )
         Spacer(modifier = GlanceModifier.width(8.dp))
         Text(
             text = value,
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = ColorProvider(Color(0xFFE0E3E7))),
         )
     }
 }
