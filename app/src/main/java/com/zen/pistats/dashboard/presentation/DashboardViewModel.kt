@@ -32,6 +32,7 @@ class DashboardViewModel(
             DashboardAction.OnManualRefreshClick -> refresh(manual = true)
             DashboardAction.OnScreenStarted -> startPolling()
             DashboardAction.OnScreenStopped -> stopPolling()
+            DashboardAction.OnWakePcClick -> wakePc()
         }
     }
 
@@ -66,6 +67,8 @@ class DashboardViewModel(
                             hostLabel = settings.baseUrl,
                             stats = null,
                             error = null,
+                            wakePcStatus = WakePcStatus.Idle,
+                            wakePcError = null,
                         )
                     }
                     return@withLock
@@ -105,6 +108,47 @@ class DashboardViewModel(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun wakePc() {
+        viewModelScope.launch {
+            val settings = settingsRepository.getCurrentSettings()
+
+            if (!settings.isConfigured) {
+                _state.update {
+                    it.copy(
+                        wakePcStatus = WakePcStatus.Failed,
+                        wakePcError = com.zen.pistats.core.presentation.UiText.StringResource(
+                            com.zen.pistats.R.string.config_missing_title,
+                        ),
+                    )
+                }
+                return@launch
+            }
+
+            _state.update {
+                it.copy(
+                    wakePcStatus = WakePcStatus.Waking,
+                    wakePcError = null,
+                )
+            }
+
+            when (val result = piStatsRepository.wakePc(settings)) {
+                is Result.Error -> _state.update {
+                    it.copy(
+                        wakePcStatus = WakePcStatus.Failed,
+                        wakePcError = result.error.toUiText(),
+                    )
+                }
+
+                is Result.Success -> _state.update {
+                    it.copy(
+                        wakePcStatus = WakePcStatus.Success,
+                        wakePcError = null,
+                    )
                 }
             }
         }

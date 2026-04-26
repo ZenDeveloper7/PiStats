@@ -13,6 +13,14 @@ sealed interface DashboardAction {
     data object OnScreenStarted : DashboardAction
     data object OnScreenStopped : DashboardAction
     data object OnManualRefreshClick : DashboardAction
+    data object OnWakePcClick : DashboardAction
+}
+
+enum class WakePcStatus {
+    Idle,
+    Waking,
+    Success,
+    Failed,
 }
 
 @Stable
@@ -23,6 +31,8 @@ data class DashboardState(
     val hostLabel: String = "",
     val stats: PiStatsUi? = null,
     val error: UiText? = null,
+    val wakePcStatus: WakePcStatus = WakePcStatus.Idle,
+    val wakePcError: UiText? = null,
 )
 
 data class PiStatsUi(

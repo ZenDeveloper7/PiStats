@@ -6,8 +6,10 @@ import com.zen.pistats.dashboard.domain.PiStats
 import com.zen.pistats.settings.domain.AppSettings
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -48,6 +50,44 @@ class KtorPiStatsRepository(
             Result.Error(DataError.Network.NO_INTERNET)
         } catch (_: Exception) {
             Result.Error(DataError.Network.UNKNOWN)
+        }
+    }
+
+    override suspend fun wakePc(settings: AppSettings): Result<Unit, DataError.Network> {
+        return try {
+            val response = httpClient.post("${settings.baseUrl}/api/wakeonlan/wake") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer ${settings.authToken}")
+                header("X-Wake-Token", settings.authToken)
+            }
+
+            when (val error = response.toNetworkErrorOrNull()) {
+                null -> Result.Success(Unit)
+                else -> Result.Error(error)
+            }
+        } catch (_: SocketTimeoutException) {
+            Result.Error(DataError.Network.REQUEST_TIMEOUT)
+        } catch (_: IOException) {
+            Result.Error(DataError.Network.NO_INTERNET)
+        } catch (_: Exception) {
+            Result.Error(DataError.Network.UNKNOWN)
+        }
+    }
+
+    private fun HttpResponse.toNetworkErrorOrNull(): DataError.Network? {
+        return when (status) {
+            HttpStatusCode.OK -> null
+            HttpStatusCode.Unauthorized -> DataError.Network.UNAUTHORIZED
+            HttpStatusCode.Forbidden -> DataError.Network.FORBIDDEN
+            HttpStatusCode.NotFound -> DataError.Network.NOT_FOUND
+            HttpStatusCode.RequestTimeout -> DataError.Network.REQUEST_TIMEOUT
+            else -> {
+                if (status.value >= 500) {
+                    DataError.Network.SERVER_ERROR
+                } else {
+                    DataError.Network.UNKNOWN
+                }
+            }
         }
     }
 }

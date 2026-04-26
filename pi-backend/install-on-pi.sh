@@ -20,6 +20,9 @@ Options:
   --tailscale-ip IP        Optional explicit Tailscale IP written to .env
   --backup-label LABEL     Backup label written to .env. Default: PiBackup
   --services CSV           Docker services list written to .env
+  --wake-mac MAC           PC MAC address for Wake-on-LAN. Default: 34:5a:60:f9:4b:96
+  --wake-broadcast IP      LAN broadcast address for Wake-on-LAN. Default: 192.168.1.255
+  --wake-port PORT         UDP port for Wake-on-LAN. Default: 9
   --token TOKEN            Auth token written to .env if no .env exists yet
   --force-env              Overwrite an existing .env file
   --no-start               Install files but do not enable/start the service
@@ -95,6 +98,9 @@ BIND_MODE="tailscale"
 TAILSCALE_IP=""
 BACKUP_LABEL="PiBackup"
 SERVICES_CSV="vaultwarden,trilium,samba,pihole"
+WAKE_MAC="34:5a:60:f9:4b:96"
+WAKE_BROADCAST="192.168.1.255"
+WAKE_PORT="9"
 TOKEN=""
 FORCE_ENV="0"
 START_SERVICE="1"
@@ -131,6 +137,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --services)
       SERVICES_CSV="$2"
+      shift 2
+      ;;
+    --wake-mac)
+      WAKE_MAC="$2"
+      shift 2
+      ;;
+    --wake-broadcast)
+      WAKE_BROADCAST="$2"
+      shift 2
+      ;;
+    --wake-port)
+      WAKE_PORT="$2"
       shift 2
       ;;
     --token)
@@ -187,6 +205,11 @@ if ! [[ "${PORT}" =~ ^[0-9]+$ ]] || [[ "${PORT}" -lt 1 ]] || [[ "${PORT}" -gt 65
   exit 1
 fi
 
+if ! [[ "${WAKE_PORT}" =~ ^[0-9]+$ ]] || [[ "${WAKE_PORT}" -lt 1 ]] || [[ "${WAKE_PORT}" -gt 65535 ]]; then
+  echo "--wake-port must be a valid UDP port between 1 and 65535" >&2
+  exit 1
+fi
+
 REQUESTED_PORT="${PORT}"
 PORT="$(find_available_port "${REQUESTED_PORT}")"
 
@@ -225,6 +248,9 @@ PISTATS_BIND_MODE=${BIND_MODE}
 PISTATS_PORT=${PORT}
 PISTATS_SERVICES=${SERVICES_CSV}
 PISTATS_BACKUP_LABEL=${BACKUP_LABEL}
+PISTATS_WAKE_MAC=${WAKE_MAC}
+PISTATS_WAKE_BROADCAST=${WAKE_BROADCAST}
+PISTATS_WAKE_PORT=${WAKE_PORT}
 EOF
 
   if [[ -n "${TAILSCALE_IP}" ]]; then
@@ -280,4 +306,5 @@ if [[ "${BIND_MODE}" == "tailscale" ]]; then
   echo "Next checks:"
   echo "  tailscale ip -4"
   echo "  curl -H \"Authorization: Bearer <token>\" http://<tailscale-ip>:${PORT}/api/stats"
+  echo "  curl -X POST -H \"X-Wake-Token: <token>\" http://<tailscale-ip>:${PORT}/api/wakeonlan/wake"
 fi

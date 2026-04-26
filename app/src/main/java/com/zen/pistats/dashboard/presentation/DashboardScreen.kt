@@ -22,10 +22,12 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.DeveloperBoard
 import androidx.compose.material.icons.outlined.Lan
 import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.PowerSettingsNew
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -150,6 +152,15 @@ fun DashboardScreen(
                     )
                 }
 
+                item {
+                    WakePcCard(
+                        isConfigured = state.isConfigured,
+                        status = state.wakePcStatus,
+                        error = state.wakePcError,
+                        onWakeClick = { onAction(DashboardAction.OnWakePcClick) },
+                    )
+                }
+
                 if (!state.isConfigured) {
                     item {
                         EmptyConfigCard()
@@ -228,6 +239,68 @@ fun DashboardScreen(
 
             if (state.isLoading && state.stats == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+}
+
+@Composable
+private fun WakePcCard(
+    isConfigured: Boolean,
+    status: WakePcStatus,
+    error: UiText?,
+    onWakeClick: () -> Unit,
+) {
+    ElevatedTonalCard(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.PowerSettingsNew,
+                    contentDescription = null,
+                    modifier = Modifier.padding(12.dp),
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    text = "Wake-on-LAN",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Text(
+                    text = when (status) {
+                        WakePcStatus.Idle -> "Relay a magic packet through the Pi to wake your PC."
+                        WakePcStatus.Waking -> "Sending wake packet..."
+                        WakePcStatus.Success -> "Wake packet sent. The PC should start if Wake-on-LAN is enabled."
+                        WakePcStatus.Failed -> error?.asString() ?: "Wake request failed."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Button(
+                    onClick = onWakeClick,
+                    enabled = isConfigured && status != WakePcStatus.Waking,
+                ) {
+                    Text(
+                        text = if (status == WakePcStatus.Waking) {
+                            "Waking..."
+                        } else {
+                            "Wake PC"
+                        },
+                    )
+                }
             }
         }
     }

@@ -3,7 +3,8 @@
 PiStats is a practical Raspberry Pi monitoring project with two parts:
 
 - a lightweight read-only Pi-side HTTP JSON API
-- an Android app built with Kotlin and Jetpack Compose that polls that API
+- a protected Pi-side Wake-on-LAN relay endpoint
+- an Android app built with Kotlin and Jetpack Compose that polls the API and can wake a configured PC
 
 The project is optimized for a fast v1: low backend overhead, a stable JSON contract early, and an Android dashboard that can ship without overengineering.
 
@@ -24,6 +25,7 @@ The project is optimized for a fast v1: low backend overhead, a stable JSON cont
   - connected or not
   - mounted or not
   - label and device when available
+- Wake-on-LAN relay through the Pi for one configured PC
 
 ## Project layout
 
@@ -38,7 +40,8 @@ docs/                 Planning and deployment docs
 ### Pi backend
 
 - Python standard library HTTP server
-- read-only JSON endpoints
+- read-only monitoring JSON endpoints
+- protected Wake-on-LAN endpoint
 - bearer-token auth
 - bound to `127.0.0.1` by default
 - intended to stay private behind Tailscale
@@ -50,6 +53,7 @@ docs/                 Planning and deployment docs
 - Ktor client
 - DataStore-backed settings
 - polling-based dashboard
+- Wake PC dashboard action
 - resizable home-screen widget
 - Tailscale-only endpoint validation
 
@@ -57,8 +61,7 @@ docs/                 Planning and deployment docs
 
 - `GET /api/health`
 - `GET /api/stats`
-- `GET /api/services`
-- `GET /api/backup-status`
+- `POST /api/wakeonlan/wake`
 
 Example `GET /api/stats` response:
 
@@ -108,6 +111,7 @@ Test it:
 
 ```bash
 curl -H "Authorization: Bearer change-me" http://127.0.0.1:8787/api/stats
+curl -X POST -H "X-Wake-Token: change-me" http://127.0.0.1:8787/api/wakeonlan/wake
 ```
 
 ### 1b. Install on a Raspberry Pi with the helper script
@@ -174,6 +178,7 @@ Currently implemented:
 
 - Pi backend scaffold and collectors
 - authenticated stats endpoints
+- Wake-on-LAN backend relay and Android Wake PC action
 - Android dashboard
 - settings persistence
 - polling-based refresh

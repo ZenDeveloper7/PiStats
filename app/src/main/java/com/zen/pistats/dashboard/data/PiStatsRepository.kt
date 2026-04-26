@@ -7,4 +7,5 @@ import com.zen.pistats.settings.domain.AppSettings
 
 interface PiStatsRepository {
     suspend fun fetchStats(settings: AppSettings): Result<PiStats, DataError.Network>
+    suspend fun wakePc(settings: AppSettings): Result<Unit, DataError.Network>
 }
