@@ -1,24 +1,22 @@
 # PiStats v1 Implementation Plan
 
-## Why this backend stack
+## Repository Boundary
 
-For v1, the Pi backend uses Python's standard library HTTP server instead of a heavier framework.
-That keeps dependencies at zero, makes local testing immediate on Linux, and is enough for a small private JSON API with bearer-token auth.
+This repository contains the Android app only. The Pi backend lives in a separate
+repository and owns implementation, Raspberry Pi install scripts, and systemd
+deployment.
 
 ## Execution order
 
-1. Define a stable JSON contract for the Pi API.
-2. Implement a localhost-bound Pi backend with read-only monitoring endpoints.
-3. Test the backend locally and capture real JSON responses.
+1. Define the stable JSON contract expected by the Android app.
+2. Implement backend changes in the backend repository.
+3. Smoke-test the backend over Tailscale with curl.
 4. Build the Android client against that contract.
-5. Add token auth, persisted settings, and polling.
-6. Add the protected Wake-on-LAN relay once the monitoring path is stable.
+5. Add token auth, persisted settings, polling, and Wake PC UI.
 
 ## Backend scope
 
-- Folder: `pi-backend/`
-- Runtime: Python 3.11+ preferred, no third-party packages required
-- Default bind: `127.0.0.1:8787`
+- Folder: separate backend repository
 - Auth: `Authorization: Bearer <token>`
 - Wake auth alias: `X-Wake-Token: <token>`
 - Endpoints:
@@ -26,18 +24,14 @@ That keeps dependencies at zero, makes local testing immediate on Linux, and is 
   - `GET /api/stats`
   - `POST /api/wakeonlan/wake`
 
-## Backend implementation notes
+## Backend contract notes
 
-- CPU usage: sampled from `/proc/stat`
-- Memory: parsed from `/proc/meminfo`
-- Disk usage: `os.statvfs("/")`
-- Uptime: `/proc/uptime`
-- Load average: `/proc/loadavg`
-- Temperature: `/sys/class/thermal/*`
-- Docker service status: `docker inspect` when Docker is available
-- Backup drive state: `lsblk` + `findmnt`, with optional mountpoint/label hints from environment
-- Wake-on-LAN: Python UDP magic packet sent to `PISTATS_WAKE_BROADCAST:PISTATS_WAKE_PORT`
-  for `PISTATS_WAKE_MAC`; no third-party wake dependency is required
+- The Android app treats `baseUrl` as the backend root and appends `/api/...`.
+- The app only accepts Tailscale IPs in `100.64.0.0/10` or `.ts.net` MagicDNS hosts.
+- The backend response for `/api/stats` includes service and backup data, so the
+  Android app does not call separate service or backup endpoints.
+- Wake-on-LAN configuration stays on the backend; the Android app never sends the
+  target PC MAC address.
 
 ## Android scope
 
@@ -111,18 +105,10 @@ That keeps dependencies at zero, makes local testing immediate on Linux, and is 
 }
 ```
 
-## Pi deployment outline
+## Backend deployment outline
 
-1. Copy `pi-backend/` to the Raspberry Pi.
-2. Set `PISTATS_TOKEN`.
-3. Optionally set:
-   - `PISTATS_HOST`
-   - `PISTATS_PORT`
-   - `PISTATS_SERVICES`
-   - `PISTATS_BACKUP_LABEL`
-   - `PISTATS_BACKUP_MOUNTPOINT`
-   - `PISTATS_WAKE_MAC`
-   - `PISTATS_WAKE_BROADCAST`
-   - `PISTATS_WAKE_PORT`
-4. Run `python3 -m pi_backend.server`.
-5. If remote access is needed, keep the API private and use Tailscale or another private path.
+1. Make backend changes in the separate backend repository.
+2. Deploy that backend to the Raspberry Pi.
+3. Keep it private behind Tailscale.
+4. Smoke-test `/api/health`, `/api/stats`, and `/api/wakeonlan/wake`.
+5. Configure this Android app with the backend Tailscale base URL and token.

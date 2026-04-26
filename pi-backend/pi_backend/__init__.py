@@ -1,1 +1,0 @@
-"""PiStats backend package."""

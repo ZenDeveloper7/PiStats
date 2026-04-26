@@ -1,12 +1,13 @@
 # PiStats
 
-PiStats is a practical Raspberry Pi monitoring project with two parts:
+PiStats is the Android client for a private Raspberry Pi monitoring setup.
 
-- a lightweight read-only Pi-side HTTP JSON API
-- a protected Pi-side Wake-on-LAN relay endpoint
-- an Android app built with Kotlin and Jetpack Compose that polls the API and can wake a configured PC
+It is built with Kotlin and Jetpack Compose, polls a companion Pi backend API,
+shows live Raspberry Pi telemetry, and can trigger a protected Wake-on-LAN relay
+through the Pi.
 
-The project is optimized for a fast v1: low backend overhead, a stable JSON contract early, and an Android dashboard that can ship without overengineering.
+The Pi backend now lives in a separate repository. Keep backend changes there and
+use this repo for Android app, widget, and client-side documentation.
 
 ## What it monitors in v1
 
@@ -31,20 +32,17 @@ The project is optimized for a fast v1: low backend overhead, a stable JSON cont
 
 ```text
 app/                  Android app
-pi-backend/           Raspberry Pi stats API
-docs/                 Planning and deployment docs
+docs/                 Android/backend contract notes
 ```
 
 ## Architecture
 
-### Pi backend
+### Backend contract
 
-- Python standard library HTTP server
-- read-only monitoring JSON endpoints
-- protected Wake-on-LAN endpoint
-- bearer-token auth
-- bound to `127.0.0.1` by default
-- intended to stay private behind Tailscale
+- Companion backend repository owns the Pi service implementation
+- This app expects bearer-token auth
+- Backend should stay private behind Tailscale
+- Android accepts only Tailscale IPs or MagicDNS `.ts.net` hosts
 
 ### Android app
 
@@ -57,7 +55,7 @@ docs/                 Planning and deployment docs
 - resizable home-screen widget
 - Tailscale-only endpoint validation
 
-## API endpoints
+## Expected API endpoints
 
 - `GET /api/health`
 - `GET /api/stats`
@@ -100,40 +98,7 @@ Example `GET /api/stats` response:
 
 ## Quick start
 
-### 1. Run the Pi backend locally
-
-```bash
-cd pi-backend
-PISTATS_TOKEN=change-me python3 -m pi_backend.server
-```
-
-Test it:
-
-```bash
-curl -H "Authorization: Bearer change-me" http://127.0.0.1:8787/api/stats
-curl -X POST -H "X-Wake-Token: change-me" http://127.0.0.1:8787/api/wakeonlan/wake
-```
-
-### 1b. Install on a Raspberry Pi with the helper script
-
-After copying `pi-backend/` to the Pi:
-
-```bash
-ssh zen@pi
-cd /home/zen/pistats-backend
-sudo ./install-on-pi.sh --token 'replace-with-a-strong-token'
-```
-
-The installer:
-
-- writes or preserves `.env`
-- installs the `systemd` service
-- enables and starts `pistats.service`
-- checks whether the requested port is busy and automatically moves upward until it finds a free one
-
-Use the final printed port in the Android app base URL.
-
-### 2. Run the Android app
+### Run the Android app
 
 ```bash
 ./gradlew :app:installDebug
@@ -161,24 +126,22 @@ Important limitation:
 - the home-screen widget cannot refresh that aggressively on Android
 - the widget updates after settings changes, app refreshes, and periodic background work
 
-## Pi deployment
+## Backend deployment
 
-PiStats is intentionally constrained to Tailscale for client access. The backend stays local by default, and the Android app rejects non-Tailscale base URLs.
+Backend deployment is handled in the separate backend repository. This Android
+client only needs the final Tailscale base URL and token.
 
-For Raspberry Pi deployment details, see:
+For the client/backend contract, see:
 
-- [Backend README](pi-backend/README.md)
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Pi Deployment Guide](docs/PI_DEPLOYMENT.md)
-- [Example systemd service](pi-backend/pistats.service.example)
 
 ## Status
 
 Currently implemented:
 
-- Pi backend scaffold and collectors
-- authenticated stats endpoints
-- Wake-on-LAN backend relay and Android Wake PC action
+- Android client for authenticated stats endpoints
+- Android Wake PC action
 - Android dashboard
 - settings persistence
 - polling-based refresh
